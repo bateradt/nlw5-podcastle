@@ -7,6 +7,8 @@ import api from '../services/api';
 import { convertDurationToTimeString } from '../utils/convertDurationToTimeString';
 
 import styles from './home.module.scss';
+import { useContext } from 'react';
+import { PlayerContext } from '../contexts/PlayerContext';
 
 type Episode = {
   id: string;
@@ -20,7 +22,7 @@ type Episode = {
   file: {
     url: string;
     type: string;
-    duration: BigInteger;
+    duration: number;
   };
 };
 
@@ -32,6 +34,8 @@ type HomeProps = {
 const TOTAL_TIME_REVALIDATE = 60 * 60 * 8;
 
 export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
+  const { play } = useContext(PlayerContext);
+
   return (
     <div className={styles.homePage}>
       <section className={styles.latestEpisodes}>
@@ -57,7 +61,18 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                   <span>{episode.durationAsString}</span>
                 </div>
 
-                <button type="button">
+                <button
+                  type="button"
+                  onClick={() =>
+                    play({
+                      duration: episode.file.duration,
+                      members: episode.members,
+                      thumbnail: episode.thumbnail,
+                      title: episode.title,
+                      url: episode.file.url,
+                    })
+                  }
+                >
                   <img src="/play-green.svg" alt="Tocar episodio" />
                 </button>
               </li>

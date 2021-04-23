@@ -31,7 +31,11 @@ type EpisodeProps = {
 };
 
 export default function Episodes({ episode }: EpisodeProps) {
-  const router = useRouter();
+  // const router = useRouter();
+
+  // if (router.isFallback) {
+  //   return <p>Carregando...</p>;
+  // }
 
   return (
     <div className={styles.episode}>
@@ -68,8 +72,27 @@ export default function Episodes({ episode }: EpisodeProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  //busca os 2 primeiros registros
+  const { data } = await api.get<Episode[]>('episodes', {
+    params: {
+      _limit: 2,
+      _sort: 'published_at',
+      _order: 'desc',
+    },
+  });
+
+  //gera o objeto para gerar estaticamente as paginas
+  const paths = data.map((episode) => {
+    return {
+      params: {
+        slug: episode.id,
+      },
+    };
+  });
+
+  //manda por parametro para gerar as paginas estaticas no momento do build
   return {
-    paths: [],
+    paths,
     fallback: 'blocking',
   };
 };
