@@ -1,12 +1,14 @@
+import React from 'react';
+import Head from 'next/head';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import api from '../../services/api';
 import { convertDurationToTimeString } from '../../utils/convertDurationToTimeString';
 import styles from './episode.module.scss';
+import { usePlayer } from '../../contexts/PlayerContext';
 
 const TOTAL_TIME_REVALIDATE_24_HOURS = 60 * 60 * 24;
 
@@ -22,7 +24,7 @@ type Episode = {
   file: {
     url: string;
     type: string;
-    duration: BigInteger;
+    duration: number;
   };
 };
 
@@ -37,8 +39,14 @@ export default function Episodes({ episode }: EpisodeProps) {
   //   return <p>Carregando...</p>;
   // }
 
+  const { play } = usePlayer();
+
   return (
     <div className={styles.episode}>
+      <Head>
+        <title>{episode.title} | Podcastle</title>
+      </Head>
+
       <div className={styles.thumbnailContainer}>
         <Link href="/">
           <button type="button">
@@ -51,7 +59,20 @@ export default function Episodes({ episode }: EpisodeProps) {
           src={episode.thumbnail}
           objectFit="cover"
         />
-        <button type="button">
+        <button
+          type="button"
+          onClick={() =>
+            play({
+              file: {
+                duration: episode.file.duration,
+                url: episode.file.url,
+              },
+              members: episode.members,
+              thumbnail: episode.thumbnail,
+              title: episode.title,
+            })
+          }
+        >
           <img src="/play.svg" alt="Tocar episódios" />
         </button>
       </div>
